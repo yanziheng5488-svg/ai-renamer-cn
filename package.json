@@ -1,0 +1,26 @@
+{
+  "name": "ai-renamer-cn",
+  "productName": "智名 AI 文件重命名",
+  "version": "1.0.0",
+  "description": "AI 智能文件重命名工具 · 中文桌面版（衍生自 ozgrozer/ai-renamer）",
+  "main": "main.js",
+  "author": "智名项目贡献者",
+  "license": "GPL-3.0-only",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "icon": "electron scripts/make-icon.js",
+    "fixture": "electron test/make-fixture.js",
+    "test": "node test/namer.test.js && node test/rename.test.js && node test/readers.test.js && node test/pipeline.test.js",
+    "build": "node scripts/build.js"
+  },
+  "dependencies": {
+    "jszip": "^3.10.2",
+    "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "electron": "^33.4.11"
+  }
+}

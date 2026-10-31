@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  html,body { margin:0; padding:0; background:transparent; }
+  .wrap { width:256px; height:256px; display:block; }
+</style></head>
+<body>
+<svg class="wrap" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="0.55" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="doc" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E8F0FF"/>
+    </linearGradient>
+    <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#0B2A6B" flood-opacity="0.28"/>
+    </filter>
+    <filter id="sh2" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0B2A6B" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+
+  <!-- 底板 -->
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)"/>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="2"/>
+
+  <!-- 文件 -->
+  <g filter="url(#sh)">
+    <path d="M74 62h72l38 38v94a12 12 0 0 1-12 12H74a12 12 0 0 1-12-12V74a12 12 0 0 1 12-12z" fill="url(#doc)"/>
+    <path d="M146 62l38 38h-26a12 12 0 0 1-12-12z" fill="#BFD4FB"/>
+  </g>
+
+  <!-- 文字行 -->
+  <rect x="88" y="120" width="70" height="11" rx="5.5" fill="#93B4F0"/>
+  <rect x="88" y="144" width="52" height="11" rx="5.5" fill="#C2D5F5"/>
+
+  <!-- AI 星芒 -->
+  <g filter="url(#sh2)">
+    <path d="M190 142c3.6 17.4 7.2 21 24.6 24.6-17.4 3.6-21 7.2-24.6 24.6-3.6-17.4-7.2-21-24.6-24.6 17.4-3.6 21-7.2 24.6-24.6z" fill="#FFFFFF"/>
+  </g>
+</svg>
+</body></html>

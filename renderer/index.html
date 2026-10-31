@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>智名 · AI 文件重命名</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ 顶栏 ============ -->
+<header class="titlebar">
+  <div class="brand">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/>
+        <path d="M9.5 14.5 12 9l2.5 5.5M10.6 12.6h2.8"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <span class="brand-name">智名</span>
+      <span class="brand-sub">AI 文件重命名</span>
+    </div>
+  </div>
+  <div class="titlebar-right">
+    <span class="model-chip" id="modelChip" title="当前使用的模型">未配置模型</span>
+  </div>
+</header>
+
+<!-- ============ 主体 ============ -->
+<main class="workspace">
+
+  <!-- 左：文件区 -->
+  <section class="content-pane">
+    <div class="toolbar">
+      <input type="search" id="searchInput" class="search-input" placeholder="筛选文件名…" autocomplete="off">
+      <div class="toolbar-actions">
+        <button class="btn btn-ghost" id="btnPickFiles" title="添加单个或多个文件">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          添加文件
+        </button>
+        <button class="btn btn-ghost" id="btnPickFolder" title="添加整个文件夹">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          添加文件夹
+        </button>
+        <span class="toolbar-sep"></span>
+        <button class="btn btn-ghost btn-icon" id="btnClear" title="清空列表">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap" id="tableWrap">
+      <!-- 空状态 -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">
+          <svg viewBox="0 0 64 64" width="52" height="52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 18a3 3 0 0 1 3-3h10l4 5h18a3 3 0 0 1 3 3v24a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3z" opacity=".45"/>
+            <path d="M32 27v14M25 34h14" opacity=".9"/>
+          </svg>
+        </div>
+        <div class="empty-title">把文件或文件夹拖到这里</div>
+        <div class="empty-desc">支持图片、视频、PDF、Word、Excel、文本和代码文件</div>
+        <div class="empty-actions">
+          <button class="btn btn-primary btn-sm" id="btnEmptyFolder">选择文件夹</button>
+          <button class="btn btn-outline btn-sm" id="btnEmptyFiles">选择文件</button>
+        </div>
+        <div class="empty-samples">
+          试试：照片 .jpg　素材 .mp4　合同 .pdf　笔记 .md
+        </div>
+      </div>
+
+      <!-- 数据表 -->
+      <table class="file-table" id="fileTable" hidden>
+        <thead>
+          <tr>
+            <th class="col-check"><input type="checkbox" id="checkAll" checked></th>
+            <th class="col-thumb"></th>
+            <th class="col-name">原文件名</th>
+            <th class="col-arrow"></th>
+            <th class="col-new">新文件名（可直接修改）</th>
+            <th class="col-status">状态</th>
+            <th class="col-act"></th>
+          </tr>
+        </thead>
+        <tbody id="fileTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="actionbar">
+      <div class="progress-area">
+        <div class="progress-meta">
+          <span id="progressText">还没有文件</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-outline" id="btnUndo" disabled title="把上一次改名的结果还原">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3.5 13a9 9 0 1 0 2.1-9.4L3 7"/></svg>
+          撤销
+        </button>
+        <button class="btn btn-outline" id="btnCancel" hidden>停止</button>
+        <button class="btn btn-primary" id="btnGenerate" disabled>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.2"/></svg>
+          <span class="btn-label">生成新名字</span>
+        </button>
+        <button class="btn btn-success" id="btnApply" disabled>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          <span class="btn-label">执行重命名</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 右：设置 -->
+  <aside class="side-pane">
+    <div class="side-scroll">
+
+      <!-- 模型服务 -->
+      <section class="panel" data-panel="model">
+        <div class="panel-head">
+          <span class="panel-title">模型服务</span>
+          <span class="panel-hint" id="modelState">未连接</span>
+        </div>
+        <div class="panel-body">
+          <label class="field">
+            <span class="field-label">服务商</span>
+            <select id="presetSelect" class="input"></select>
+          </label>
+
+          <label class="field">
+            <span class="field-label">接口地址</span>
+            <input type="text" id="baseURLInput" class="input mono" placeholder="https://…/v1" spellcheck="false">
+          </label>
+
+          <label class="field">
+            <span class="field-label">
+              API Key
+              <a class="field-link" id="keyLink" href="#">去申请 →</a>
+            </span>
+            <div class="input-group">
+              <input type="password" id="apiKeyInput" class="input mono" placeholder="粘贴你的 API Key" spellcheck="false" autocomplete="off">
+              <button class="input-suffix" id="btnToggleKey" title="显示/隐藏">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>
+              </button>
+            </div>
+          </label>
+
+          <div class="field">
+            <span class="field-label">
+              模型
+              <button class="field-link as-btn" id="btnRefreshModels">刷新列表</button>
+            </span>
+            <div class="input-group" id="modelGroup">
+              <input type="text" id="modelInput" class="input mono" placeholder="模型名称，可手填" spellcheck="false" autocomplete="off">
+              <button class="input-suffix" id="btnModelList" title="从列表选择">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dropdown" id="modelDropdown" hidden></div>
+            </div>
+          </div>
+
+          <div class="test-row">
+            <button class="btn btn-outline btn-sm" id="btnTest">测试连接</button>
+            <span class="test-result" id="testResult"></span>
+          </div>
+
+          <p class="panel-note" id="presetNote"></p>
+        </div>
+      </section>
+
+      <!-- 命名规则 -->
+      <section class="panel" data-panel="rule">
+        <div class="panel-head">
+          <span class="panel-title">命名规则</span>
+        </div>
+        <div class="panel-body">
+          <label class="field">
+            <span class="field-label">输出语言</span>
+            <select id="languageSelect" class="input"></select>
+          </label>
+
+          <label class="field">
+            <span class="field-label">命名风格</span>
+            <select id="styleSelect" class="input"></select>
+            <span class="field-tip" id="styleTip"></span>
+          </label>
+
+          <div class="field-row">
+            <label class="field">
+              <span class="field-label">最多字数</span>
+              <input type="number" id="maxCharsInput" class="input" min="4" max="120" step="1">
+            </label>
+            <label class="field">
+              <span class="field-label">最多词数</span>
+              <input type="number" id="maxWordsInput" class="input" min="1" max="12" step="1">
+            </label>
+          </div>
+
+          <label class="field">
+            <span class="field-label">
+              自定义要求
+              <span class="field-label-sub">可选，会追加到提示词</span>
+            </span>
+            <textarea id="customPromptInput" class="input textarea" rows="3"
+              placeholder="例如：只描述画面主体，不要写颜色；或者：按「项目名+日期」命名"></textarea>
+          </label>
+        </div>
+      </section>
+
+      <!-- 高级 -->
+      <section class="panel collapsed" data-panel="adv">
+        <div class="panel-head clickable" id="advToggle">
+          <span class="panel-title">高级设置</span>
+          <svg class="chev" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="panel-body">
+          <div class="field-row">
+            <label class="field">
+              <span class="field-label">视频抽帧数</span>
+              <input type="number" id="framesInput" class="input" min="1" max="8" step="1">
+            </label>
+            <label class="field">
+              <span class="field-label">同时处理数</span>
+              <input type="number" id="concurrencyInput" class="input" min="1" max="8" step="1">
+            </label>
+          </div>
+          <label class="switch-row">
+            <input type="checkbox" id="recursiveCheck">
+            <span>包含子文件夹</span>
+          </label>
+          <label class="field">
+            <span class="field-label">文件名前缀</span>
+            <input type="text" id="prefixInput" class="input" placeholder="如 2026-10 或 项目A" spellcheck="false">
+          </label>
+          <p class="panel-note dim">抽帧数越多越准，但也更慢、更费额度。改完设置会自动保存。</p>
+        </div>
+      </section>
+
+      <div class="side-footer">
+        <span id="appVersion"></span>
+        <span class="dot">·</span>
+        <span id="ffmpegState"></span>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<!-- 拖拽蒙层 -->
+<div class="dropzone-overlay" id="dropOverlay">
+  <div class="dropzone-box">
+    <div class="dropzone-title">松开即可添加</div>
+    <div class="dropzone-sub">文件、文件夹都支持</div>
+  </div>
+</div>
+
+<!-- 通用弹窗 -->
+<div class="modal-mask" id="modalMask" hidden>
+  <div class="modal" role="dialog">
+    <h3 class="modal-title" id="modalTitle"></h3>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="modalCancel">取消</button>
+      <button class="btn btn-primary" id="modalOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 轻提示 -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

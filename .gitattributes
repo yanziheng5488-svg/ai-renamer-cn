@@ -1,0 +1,21 @@
+# 统一换行符，避免 Windows 与 macOS/Linux 协作者之间出现整文件 diff
+* text=auto eol=lf
+
+# Windows 批处理脚本必须保持 CRLF
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# 二进制文件不做换行转换
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.ico  binary
+*.pdf  binary
+*.exe  binary
+*.zip  binary
+
+# 语言统计时排除
+package-lock.json linguist-generated=true
+assets/screenshot.png linguist-vendored
+test/fixtures/sample.pdf linguist-vendored
